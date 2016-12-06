@@ -1,0 +1,5 @@
+models/mlp_num_hidden_units_1024_num_hidden_layers_3_epoch_02.hdf5
+0.316251344175
+models/lstm_1_num_hidden_units_lstm_512_num_hidden_units_mlp_1024_num_hidden_layers_mlp_3_num_hidden_layers_lstm_2_epoch_002.hdf5
+0.211016195931
+

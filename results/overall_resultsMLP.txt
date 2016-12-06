@@ -1,0 +1,2 @@
+models/mlp_num_hidden_units_1024_num_hidden_layers_3_epoch_02.hdf5
+0.316251344175
