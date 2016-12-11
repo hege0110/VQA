@@ -125,7 +125,7 @@ def prepare_image(im_name,im_dir):
 	im = np.expand_dims(im, axis=0)
 	return im
 
-def get_images_matrix_from_model(model, im_batch, im_dir, mapping):
+def get_images_matrix_from_model(model, im_batch, im_dir):
 	'''
 	Gets the 4096-dimensional CNN features for the given COCO
 	images
@@ -137,11 +137,6 @@ def get_images_matrix_from_model(model, im_batch, im_dir, mapping):
 	nb_dimensions = 4096
 	image_matrix = np.zeros((nb_samples, nb_dimensions))
 	for j in xrange(nb_samples):
-		if im_batch[j] in mapping:
-			image_matrix[j,:] = mapping[im_batch[j]]
-		else:
-			im = prepare_image(im_batch[j],im_dir)
-			temp = model.predict(im)
-			image_matrix[j,:] = temp
-			mapping[im_batch[j]] = temp
+		im = prepare_image(im_batch[j],im_dir)
+		image_matrix[j,:] = model.predict(im)
 	return image_matrix

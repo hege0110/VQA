@@ -102,7 +102,7 @@ if __name__ == "__main__":
     model.compile(optimizer=sgd, loss='categorical_crossentropy')
     # f = open('abstract_image_precompute.txt')
 
-    for i in range(num_images):
-        img_path = '../scene_img_abstract_v002_train2015/abstract_v002_train2015_' + "%0*d" % (12, i) + '.png'
+    for i in range(num_images-1, -1, -1):
+        img_path = 'scene_img_abstract_v002_train2015/abstract_v002_train2015_' + "%0*d" % (12, i) + '.png'
         get_prediction(img_path, model, f)
         progbar.add(1)
