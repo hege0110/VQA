@@ -2,9 +2,11 @@ from keras.models import Sequential
 from keras.layers.core import Flatten, Dense, Dropout
 from keras.layers.convolutional import Convolution2D, MaxPooling2D, ZeroPadding2D
 from keras.optimizers import SGD
+from keras.utils import generic_utils
 import cv2, numpy as np
 import pdb
 import h5py
+import os
 
 def VGG_16(weights_path):
     model = Sequential()
@@ -69,21 +71,38 @@ def VGG_16(weights_path):
 
 # def load_weights(model, weights_path):
 
-if __name__ == "__main__":
-    im = cv2.resize(cv2.imread('cat.jpg'), (224, 224)).astype(np.float32)
+def get_prediction(img_path, model, f):
+    # print img_path
+    im = cv2.resize(cv2.imread(img_path), (224, 224)).astype(np.float32)
     im[:,:,0] -= 103.939
     im[:,:,1] -= 116.779
     im[:,:,2] -= 123.68
     im = im.transpose((2,0,1))
     im = np.expand_dims(im, axis=0)
+    # return model.predict(im)[0]
+    out = model.predict(im)
+    np.savetxt(f, out)
+
+if __name__ == "__main__":
+    # im = cv2.resize(cv2.imread('cat.jpg'), (224, 224)).astype(np.float32)
+    # im[:,:,0] -= 103.939
+    # im[:,:,1] -= 116.779
+    # im[:,:,2] -= 123.68
+    # im = im.transpose((2,0,1))
+    # im = np.expand_dims(im, axis=0)
+    cwd = os.getcwd()
+    f = open(cwd + '/abstract_image_precompute.txt', 'w+')
+    num_images = 20000
+    progbar = generic_utils.Progbar(num_images)
 
     # Test pretrained model
     model = VGG_16('vgg16_weights.h5')
     #model = load_weights(model, 'vgg16_weights.h5')
     sgd = SGD(lr=0.1, decay=1e-6, momentum=0.9, nesterov=True)
     model.compile(optimizer=sgd, loss='categorical_crossentropy')
-    out = model.predict(im)[0]
-    print out.shape
-    #pdb.set_trace()
-    #out.shape
-    #print np.argmax(out), out.shape
+    # f = open('abstract_image_precompute.txt')
+
+    for i in range(num_images):
+        img_path = '../scene_img_abstract_v002_train2015/abstract_v002_train2015_' + "%0*d" % (12, i) + '.png'
+        get_prediction(img_path, model, f)
+        progbar.add(1)
