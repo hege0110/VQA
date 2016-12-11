@@ -1,6 +1,7 @@
 import numpy as np
 from keras.utils import np_utils
-
+import cv2, numpy as np
+import pdb
 
 def get_questions_tensor_timeseries(questions, nlp, timesteps):
 	'''
@@ -87,4 +88,60 @@ def get_images_matrix(img_coco_ids, img_map, VGGfeatures):
 	for j in xrange(len(img_coco_ids)):
 		image_matrix[j,:] = VGGfeatures[:,img_map[img_coco_ids[j]]]
 
+	return image_matrix
+
+def get_images_matrix(img_coco_ids, img_map, VGGfeatures):
+	'''
+	Gets the 4096-dimensional CNN features for the given COCO
+	images
+	
+	Input:
+	img_coco_ids: 	A list of strings, each string corresponding to
+				  	the MS COCO Id of the relevant image
+	img_map: 		A dictionary that maps the COCO Ids to their indexes 
+					in the pre-computed VGG features matrix
+
+	Ouput:
+	A numpy matrix of size (nb_samples, nb_dimensions)
+	'''
+	assert not isinstance(img_coco_ids, basestring)
+	nb_samples = len(img_coco_ids)
+	nb_dimensions = VGGfeatures.shape[0]
+	image_matrix = np.zeros((nb_samples, nb_dimensions))
+	for j in xrange(len(img_coco_ids)):
+		image_matrix[j,:] = VGGfeatures[:,img_map[img_coco_ids[j]]]
+
+	return image_matrix
+
+def prepare_image(im_name,im_dir):
+	im_name = im_name.zfill(12)
+	im_path = im_dir + im_name +'.png'
+	#pdb.set_trace()
+	im = cv2.resize(cv2.imread(im_path), (224, 224)).astype(np.float32)
+	im[:,:,0] -= 103.939
+	im[:,:,1] -= 116.779
+	im[:,:,2] -= 123.68
+	im = im.transpose((2,0,1))
+	im = np.expand_dims(im, axis=0)
+	return im
+
+def get_images_matrix_from_model(model, im_batch, im_dir, mapping):
+	'''
+	Gets the 4096-dimensional CNN features for the given COCO
+	images
+
+	Ouput:
+	A numpy matrix of size (nb_samples, nb_dimensions)
+	'''
+	nb_samples = len(im_batch)
+	nb_dimensions = 4096
+	image_matrix = np.zeros((nb_samples, nb_dimensions))
+	for j in xrange(nb_samples):
+		if im_batch[j] in mapping:
+			image_matrix[j,:] = mapping[im_batch[j]]
+		else:
+			im = prepare_image(im_batch[j],im_dir)
+			temp = model.predict(im)
+			image_matrix[j,:] = temp
+			mapping[im_batch[j]] = temp
 	return image_matrix

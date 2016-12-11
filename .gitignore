@@ -3,3 +3,5 @@ data/
 models/
 features/
 .ipynb_checkpoints/
+*.h5
+*.jpg
