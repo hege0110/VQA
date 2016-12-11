@@ -90,7 +90,30 @@ def get_images_matrix(img_coco_ids, img_map, VGGfeatures):
 
 	return image_matrix
 
-def get_images_matrix(img_coco_ids, img_map, VGGfeatures):
+# def get_images_matrix(img_coco_ids, img_map, VGGfeatures):
+# 	'''
+# 	Gets the 4096-dimensional CNN features for the given COCO
+# 	images
+	
+# 	Input:
+# 	img_coco_ids: 	A list of strings, each string corresponding to
+# 				  	the MS COCO Id of the relevant image
+# 	img_map: 		A dictionary that maps the COCO Ids to their indexes 
+# 					in the pre-computed VGG features matrix
+
+# 	Ouput:
+# 	A numpy matrix of size (nb_samples, nb_dimensions)
+# 	'''
+# 	assert not isinstance(img_coco_ids, basestring)
+# 	nb_samples = len(img_coco_ids)
+# 	nb_dimensions = VGGfeatures.shape[0]
+# 	image_matrix = np.zeros((nb_samples, nb_dimensions))
+# 	for j in xrange(len(img_coco_ids)):
+# 		image_matrix[j,:] = VGGfeatures[:,img_map[img_coco_ids[j]]]
+
+# 	return image_matrix
+
+def get_images_matrix(img_coco_ids, VGGfeatures, VGGfeatures_reverse):
 	'''
 	Gets the 4096-dimensional CNN features for the given COCO
 	images
@@ -98,18 +121,26 @@ def get_images_matrix(img_coco_ids, img_map, VGGfeatures):
 	Input:
 	img_coco_ids: 	A list of strings, each string corresponding to
 				  	the MS COCO Id of the relevant image
-	img_map: 		A dictionary that maps the COCO Ids to their indexes 
-					in the pre-computed VGG features matrix
+	VGGfeatures: 	image features
+	VGGfeatures_reverse: image features, stored in reverse order
 
 	Ouput:
 	A numpy matrix of size (nb_samples, nb_dimensions)
 	'''
 	assert not isinstance(img_coco_ids, basestring)
 	nb_samples = len(img_coco_ids)
-	nb_dimensions = VGGfeatures.shape[0]
+	nb_dimensions = VGGfeatures.shape[1]
 	image_matrix = np.zeros((nb_samples, nb_dimensions))
+	threshold1 = VGGfeatures.shape[0]
+	threshold2 = 20000 - VGGfeatures_reverse.shape[0]
 	for j in xrange(len(img_coco_ids)):
-		image_matrix[j,:] = VGGfeatures[:,img_map[img_coco_ids[j]]]
+		index = int(img_coco_ids[j])
+		if index < threshold1:
+			image_matrix[j,:] = VGGfeatures[index]
+		elif index >= threshold2:
+			# 20000 -> 0
+			# 12507 -> 20000 - 12507 = 7493
+			image_matrix[j,:] = VGGfeatures_reverse[num_rev_rows-index]
 
 	return image_matrix
 
