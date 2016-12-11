@@ -94,13 +94,6 @@ def main():
 	open(model_file_name  + '.json', 'w').write(json_string)
 	
 	print 'Training started...'
-	id_map = {}
-	f1 = open('abstract_image_precompute')
-	f2 = open('abstract_image_precompute_reverse')
-	VGGfeatures = np.loadtxt(f1)
-	VGGfeatures_reverse = np.loadtxt(f2)
-	f1.close()
-	f2.close()
 	for k in xrange(args.num_epochs):
 		#shuffle the data points before going through them
 		index_shuf = range(len(questions_train))
@@ -115,10 +108,9 @@ def main():
 			
 			X_q_batch = get_questions_matrix_sum(qu_batch, nlp)
 			im_path = args.im_dir +"abstract_v002_train2015_"
-			print 'getting image features...'
-			X_i_batch = get_images_matrix(im_batch, VGGfeatures, VGGfeatures_reverse)
-			# X_i_batch = get_images_matrix_from_model(vgg_model, im_batch, im_path, id_map)
-			X_batch = np.hstack((X_q_batch, X_i_batch))
+			#print 'getting image features...'
+			#X_i_batch = get_images_matrix_from_model(vgg_model, im_batch, im_path)
+			#X_batch = np.hstack((X_q_batch, X_i_batch))
 
 			Y_batch = get_answers_matrix(an_batch, labelencoder)
 			print 'running training on batch...'
@@ -129,6 +121,7 @@ def main():
 
 		if k%args.model_save_interval == 0:
 			model.save_weights(model_file_name + '_epoch_{:02d}.hdf5'.format(k))
+
 	model.save_weights(model_file_name + '_epoch_{:02d}.hdf5'.format(k))
 
 if __name__ == "__main__":
