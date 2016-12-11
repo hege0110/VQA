@@ -4,6 +4,7 @@ import progressbar
 import json
 from spacy.en import English
 import os
+import commands
 def getModalAnswer(answers):
 	candidates = {}
 	for i in xrange(10):
@@ -84,9 +85,15 @@ def main():
 	
 	pbar = progressbar.ProgressBar()
 	print 'Dumping questions, answers, questionIDs, imageIDs, and questions lengths to text files...'
+	f1_len = commands.getstatusoutput('wc -l abstract_image_precompute.txt')
+	f2_len = commands.getstatusoutput('wc -l abstract_image_precompute_reverse.txt')
+	THRESHOLD1 = int(filter(None, f1_len[1].split(' '))[0])
+	THRESHOLD2 = 20000 - int(filter(None, f2_len[1].split(' '))[0])
 	for i, q in pbar(zip(xrange(len(ques)),ques)):
 		# questions_file.write((q['question'] + '\n').encode('utf8'))
 		# questions_lengths_file.write((str(len(nlp(q['question'])))+ '\n').encode('utf8'))
+		if (q['question_id'] >= THRESHOLD1 and q['question_id'] < THRESHOLD2):
+			continue
 		question = q['question'] + ' ' + ' '.join(q['multiple_choices'])
 		questions_file.write((question + '\n').encode('utf8'))
 		questions_lengths_file.write((str(len(nlp(question)))+ '\n').encode('utf8'))
